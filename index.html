@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Restaurant Admin</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 40px;
+    }
+
+    input, button {
+      padding: 8px;
+      margin: 5px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .card {
+      background: white;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<h1>🍽 Restaurant Admin Panel</h1>
+
+<!-- CATEGORY -->
+<h2>Category</h2>
+<input id="cat_name" placeholder="Category name">
+<button onclick="createCategory()">Qo‘shish</button>
+
+<div id="categories"></div>
+
+
+<!-- MENU -->
+<h2>Menu Item</h2>
+<input id="m_name" placeholder="Name">
+<input id="m_price" placeholder="Price">
+<input id="m_desc" placeholder="Description">
+<input id="m_cat" placeholder="Category ID">
+<button onclick="createMenu()">Qo‘shish</button>
+
+<div id="menu"></div>
+
+
+<!-- ORDER -->
+<h2>Order</h2>
+<input id="o_address" placeholder="Address">
+<input id="o_total" placeholder="Total">
+<input id="o_phone" placeholder="Phone">
+<input id="o_status" placeholder="Status">
+<button onclick="createOrder()">Qo‘shish</button>
+
+<div id="orders"></div>
+
+
+<!-- ORDER ITEM -->
+<h2>Order Items</h2>
+<input id="oi_menu" placeholder="Menu Item ID">
+<input id="oi_quantity" placeholder="Quantity">
+<input id="oi_total" placeholder="Total">
+<input id="oi_order" placeholder="Order ID">
+<button onclick="createOrderItem()">Qo‘shish</button>
+
+<div id="order_items"></div>
+
+
+<script>
+const API = "http://127.0.0.1:8000/api/res";
+
+// ================= CATEGORY =================
+
+async function createCategory() {
+  const name = document.getElementById("cat_name").value;
+
+  await fetch(API + "/categories", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name })
+  });
+
+  getCategories();
+}
+
+async function getCategories() {
+  const res = await fetch(API + "/categories");
+  const data = await res.json();
+
+  const div = document.getElementById("categories");
+  div.innerHTML = "";
+
+  data.forEach(c => {
+    div.innerHTML += `
+      <div class="card">
+        ${c.id} - ${c.name}
+        <button onclick="deleteCategory(${c.id})">❌</button>
+      </div>
+    `;
+  });
+}
+
+async function deleteCategory(id) {
+  await fetch(API + "/categories/" + id, { method: "DELETE" });
+  getCategories();
+}
+
+
+// ================= MENU =================
+
+async function createMenu() {
+  const name = document.getElementById("m_name").value;
+  const price = parseFloat(document.getElementById("m_price").value);
+  const description = document.getElementById("m_desc").value;
+  const category = parseInt(document.getElementById("m_cat").value);
+
+  await fetch(API + "/menu_items", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name, price, description, category })
+  });
+
+  getMenu();
+}
+
+async function getMenu() {
+  const res = await fetch(API + "/menu_items");
+  const data = await res.json();
+
+  const div = document.getElementById("menu");
+  div.innerHTML = "";
+
+  data.forEach(m => {
+    div.innerHTML += `
+      <div class="card">
+        ${m.id} - ${m.name} - ${m.price}
+        <button onclick="deleteMenu(${m.id})">❌</button>
+      </div>
+    `;
+  });
+}
+
+async function deleteMenu(id) {
+  await fetch(API + "/menu_items/" + id, { method: "DELETE" });
+  getMenu();
+}
+
+
+// ================= ORDER =================
+
+async function createOrder() {
+  const address = document.getElementById("o_address").value;
+  const total = parseFloat(document.getElementById("o_total").value);
+  const phone_number = document.getElementById("o_phone").value;
+  const status = document.getElementById("o_status").value;
+
+  await fetch(API + "/orders", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ address, total, phone_number, status })
+  });
+
+  getOrders();
+}
+
+async function getOrders() {
+  const res = await fetch(API + "/orders");
+  const data = await res.json();
+
+  const div = document.getElementById("orders");
+  div.innerHTML = "";
+
+  data.forEach(o => {
+    div.innerHTML += `
+      <div class="card">
+        Order #${o.id} | ${o.total} | ${o.status}
+        <button onclick="deleteOrder(${o.id})">❌</button>
+      </div>
+    `;
+  });
+}
+
+async function deleteOrder(id) {
+  await fetch(API + "/orders/" + id, { method: "DELETE" });
+  getOrders();
+}
+
+
+// ================= ORDER ITEM =================
+
+async function createOrderItem() {
+  const menu_item = parseInt(document.getElementById("oi_menu").value);
+  const quantity = parseInt(document.getElementById("oi_quantity").value);
+  const total = parseFloat(document.getElementById("oi_total").value);
+  const order = parseInt(document.getElementById("oi_order").value);
+
+  await fetch(API + "/order_items", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ menu_item, quantity, total, order })
+  });
+
+  getOrderItems();
+}
+
+async function getOrderItems() {
+  const res = await fetch(API + "/order_items");
+  const data = await res.json();
+
+  const div = document.getElementById("order_items");
+  div.innerHTML = "";
+
+  data.forEach(oi => {
+    div.innerHTML += `
+      <div class="card">
+        ID:${oi.id} | Menu:${oi.menu_item} | Qty:${oi.quantity} | Total:${oi.total}
+        <button onclick="deleteOrderItem(${oi.id})">❌</button>
+      </div>
+    `;
+  });
+}
+
+async function deleteOrderItem(id) {
+  await fetch(API + "/order_items/" + id, { method: "DELETE" });
+  getOrderItems();
+}
+
+
+// ================= INIT =================
+
+getCategories();
+getMenu();
+getOrders();
+getOrderItems();
+
+</script>
+
+</body>
+</html>

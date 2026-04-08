@@ -7,14 +7,14 @@ from typing import Optional, List
 from database import Base
 
 class Category(Base):
-    __tablename__='categorys'
+    __tablename__='categories'
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(length=100))
     
-    menu_items: Mapped[List['Menu_item']] = relationship(back_populates='categories')
+    menu_items: Mapped[List['MenuItem']] = relationship(back_populates='categories')
 
-class Menu_item(Base):
+class MenuItem(Base):
     __tablename__='menu_items'
     
 
